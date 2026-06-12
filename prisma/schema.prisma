@@ -1,0 +1,70 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+// This is your database blueprint file
+
+model Customer {
+  id          String     @id @default(uuid())
+  name        String
+  phone       String     @unique // Unique index makes searching old customers instant
+  createdAt   DateTime   @default(now())
+  orders      JobOrder[]
+}
+
+model JobOrder {
+  id               String       @id @default(uuid())
+  customerId       String
+  customer         Customer     @relation(fields: [customerId], references: [id])
+  prescriptionData Json         // Stores SPH, CYL, AXIS, ADD as flexible JSON
+  totalAmount      Float
+  advancePaid      Float
+  balanceDue       Float
+  status           String       // Placed, In_Lab, Ready_For_Pickup, Completed
+  orderDate        DateTime     @default(now())
+  items            OrderItem[]
+  payments         PaymentLog[]
+}
+
+model PaymentLog {
+  id            String   @id @default(uuid())
+  orderId       String
+  order         JobOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  amountPaid    Float
+  paymentMethod String   // "Cash", "UPI", "Card"
+  paymentDate   DateTime @default(now())
+  notes         String?
+}
+
+model InventoryItem {
+  id          String      @id @default(uuid())
+  name        String
+  type        String      // "FRAME" or "LENS"
+  skuCode     String      @unique
+  stock       Int
+  alertLimit  Int         // Minimum stock before orange alert triggers
+  price       Float
+  brand       String?     // Only for Frames
+  color       String?     // Only for Frames
+  modelNumber String?     // Only for Frames
+  orders      OrderItem[]
+}
+
+model OrderItem {
+  id              String        @id @default(uuid())
+  orderId         String
+  order           JobOrder      @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  inventoryItemId String
+  inventoryItem   InventoryItem @relation(fields: [inventoryItemId], references: [id])
+  quantity        Int
+}
