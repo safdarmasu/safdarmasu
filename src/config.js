@@ -6,6 +6,11 @@
 export const getApiUrl = (path = '') => {
   const hostname = window.location.hostname;
 
+  // Prioritize cloud backend if configured in environment variables (Vercel)
+  if (import.meta.env.VITE_API_URL) {
+    return `${import.meta.env.VITE_API_URL}${path}`;
+  }
+
   // Local development (PC host)
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     return `http://localhost:5000${path}`;
@@ -17,8 +22,6 @@ export const getApiUrl = (path = '') => {
     return `http://${hostname}:5000${path}`;
   }
 
-  // Cloud deployment (Vercel client)
-  // For cloud deployments, if there's a deployed backend server, use it.
-  // Otherwise, default to standard localhost or fall back to current host if combined.
+  // Default fallback (local backend)
   return `http://localhost:5000${path}`;
 };
