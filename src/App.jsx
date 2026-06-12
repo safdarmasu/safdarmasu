@@ -1,12 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Dashboard from './components/Dashboard';
 import CheckoutScreen from './components/CheckoutScreen';
 import OrdersScreen from './components/OrdersScreen';
 import CustomersScreen from './components/CustomersScreen';
 import InventoryScreen from './components/InventoryScreen';
+import { getApiUrl } from './config';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [apiConnected, setApiConnected] = useState(true);
+  const [isChecking, setIsChecking] = useState(true);
+
+  useEffect(() => {
+    const checkConnection = async () => {
+      try {
+        const res = await fetch(getApiUrl('/api/inventory'));
+        if (res.ok) {
+          setApiConnected(true);
+        } else {
+          setApiConnected(false);
+        }
+      } catch (e) {
+        setApiConnected(false);
+      } finally {
+        setIsChecking(false);
+      }
+    };
+    checkConnection();
+    // Re-check every 15 seconds to auto-recover if backend starts
+    const interval = setInterval(checkConnection, 15000);
+    return () => clearInterval(interval);
+  }, []);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -64,6 +88,36 @@ function App() {
 
       {/* Main page content area */}
       <main className="flex-1 overflow-y-auto">
+        {!apiConnected && !isChecking && (
+          <div className="max-w-6xl w-full mx-auto px-4 pt-6">
+            <div className="bg-rose-50 border border-rose-200/60 text-rose-800 rounded-3xl p-6 shadow-sm space-y-4 animate-in fade-in duration-200">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                <h3 className="text-sm font-black uppercase tracking-wider text-rose-950">Database Connection Failed</h3>
+              </div>
+              
+              <p className="text-xs font-semibold text-rose-800/90 leading-relaxed">
+                The OPTISOFT app cannot reach the database server at <code className="bg-white border border-rose-200 px-2 py-0.5 rounded-lg font-mono text-rose-950 font-black">{getApiUrl()}</code>. 
+                Because your database is hosted locally on the main shop PC, other devices (mobile/tablet) cannot connect to it using the cloud Vercel URL.
+              </p>
+
+              <div className="bg-white/80 rounded-2xl p-4 border border-rose-200/40 text-xs space-y-3 text-slate-700 font-medium">
+                <p className="font-extrabold text-slate-800">Please follow these steps to connect this device:</p>
+                <ol className="list-decimal list-inside space-y-2 text-slate-600 pl-1">
+                  <li>Ensure the main Windows PC is turned on and running the backend server (<code className="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-indigo-600 font-bold">npm run server</code>).</li>
+                  <li>Ensure this device (mobile/tablet) is connected to the **same Wi-Fi network** as the PC.</li>
+                  <li>Open the PC's local Wi-Fi address in your browser: <a href="http://10.90.85.155:5173/" className="font-extrabold text-indigo-600 hover:underline">http://10.90.85.155:5173/</a></li>
+                  <li>If it still fails, run these commands in **PowerShell (as Administrator)** on the main PC to allow connections through the firewall:
+                    <pre className="bg-slate-900 text-slate-100 p-3.5 rounded-xl mt-2 overflow-x-auto font-mono text-[10px] select-all leading-normal">
+{`New-NetFirewallRule -DisplayName "OPTISOFT Vite Frontend" -Direction Inbound -LocalPort 5173 -Protocol TCP -Action Allow
+New-NetFirewallRule -DisplayName "OPTISOFT Node API Server" -Direction Inbound -LocalPort 5000 -Protocol TCP -Action Allow`}
+                    </pre>
+                  </li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        )}
         {renderContent()}
       </main>
 
