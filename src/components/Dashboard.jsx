@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getApiUrl } from '../config';
 
 export default function Dashboard({ setActiveTab }) {
   const [stats, setStats] = useState({
@@ -16,8 +17,8 @@ export default function Dashboard({ setActiveTab }) {
   useEffect(() => {
     async function loadData() {
       try {
-        const ordersRes = await fetch('http://localhost:5000/api/orders');
-        const stockRes = await fetch('http://localhost:5000/api/inventory/low-stock');
+        const ordersRes = await fetch(getApiUrl('/api/orders'));
+        const stockRes = await fetch(getApiUrl('/api/inventory/low-stock'));
         
         if (ordersRes.ok && stockRes.ok) {
           const orders = await ordersRes.json();

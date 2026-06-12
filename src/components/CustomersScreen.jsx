@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getApiUrl } from '../config';
 
 export default function CustomersScreen() {
   const [customers, setCustomers] = useState([]);
@@ -12,7 +13,7 @@ export default function CustomersScreen() {
 
   const fetchCustomers = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/customers');
+      const res = await fetch(getApiUrl('/api/customers'));
       if (res.ok) {
         const data = await res.json();
         setCustomers(data);
@@ -26,7 +27,7 @@ export default function CustomersScreen() {
 
   const handleSelectCustomerDetail = async (cPhone) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/customers/search?phone=${encodeURIComponent(cPhone)}`);
+      const res = await fetch(getApiUrl(`/api/customers/search?phone=${encodeURIComponent(cPhone)}`));
       if (res.ok) {
         const data = await res.json();
         setSelectedCustomer(data);

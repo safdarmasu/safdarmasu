@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getApiUrl } from '../config';
 
 // Preset values for horizontal scroll selection wheels
 const SPH_PRESETS = [0.00, 0.25, 0.50, 0.75, 1.00, 1.25, 1.50, 1.75, 2.00, 2.25, 2.50, 2.75, 3.00, 3.25, 3.50, 3.75, 4.00, 4.50, 5.00, 5.50, 6.00];
@@ -64,7 +65,7 @@ export default function CheckoutScreen({ setActiveTab }) {
 
   const fetchInventory = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/inventory');
+      const res = await fetch(getApiUrl('/api/inventory'));
       if (res.ok) {
         const data = await res.json();
         setInventory(data);
@@ -141,7 +142,7 @@ export default function CheckoutScreen({ setActiveTab }) {
     if (!customer.phone.trim()) return;
     setSearchStatus('searching');
     try {
-      const res = await fetch(`http://localhost:5000/api/customers/search?phone=${encodeURIComponent(customer.phone.trim())}`);
+      const res = await fetch(getApiUrl(`/api/customers/search?phone=${encodeURIComponent(customer.phone.trim())}`));
       if (res.ok) {
         const data = await res.json();
         setCustomer({ name: data.name, phone: data.phone });
@@ -218,7 +219,7 @@ export default function CheckoutScreen({ setActiveTab }) {
     };
 
     try {
-      const res = await fetch('http://localhost:5000/api/orders/create', {
+      const res = await fetch(getApiUrl('/api/orders/create'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

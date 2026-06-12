@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getApiUrl } from '../config';
 
 export default function InventoryScreen() {
   const [inventory, setInventory] = useState([]);
@@ -27,7 +28,7 @@ export default function InventoryScreen() {
 
   const fetchInventory = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/inventory');
+      const res = await fetch(getApiUrl('/api/inventory'));
       if (res.ok) {
         const data = await res.json();
         setInventory(data);
@@ -52,7 +53,7 @@ export default function InventoryScreen() {
 
     setIsSubmitting(true);
     try {
-      const res = await fetch('http://localhost:5000/api/inventory/add', {
+      const res = await fetch(getApiUrl('/api/inventory/add'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

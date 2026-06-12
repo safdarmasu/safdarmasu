@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getApiUrl } from '../config';
 
 const STATUS_OPTS = [
   { value: 'Placed', label: 'Placed', bg: 'bg-blue-50 text-blue-700 border-blue-200', dot: 'bg-blue-500' },
@@ -24,7 +25,7 @@ export default function OrdersScreen() {
 
   const fetchOrders = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/orders');
+      const res = await fetch(getApiUrl('/api/orders'));
       if (res.ok) {
         const data = await res.json();
         setOrders(data);
@@ -43,7 +44,7 @@ export default function OrdersScreen() {
 
   const handleStatusUpdate = async (orderId, newStatus) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/orders/${orderId}/status`, {
+      const res = await fetch(getApiUrl(`/api/orders/${orderId}/status`), {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
@@ -71,7 +72,7 @@ export default function OrdersScreen() {
 
     setIsSubmittingPayment(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/orders/${selectedOrder.id}/payments`, {
+      const res = await fetch(getApiUrl(`/api/orders/${selectedOrder.id}/payments`), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
